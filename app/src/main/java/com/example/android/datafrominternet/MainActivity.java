@@ -43,4 +43,21 @@ public class MainActivity extends AppCompatActivity {
         // done (30) Use findViewById to get a reference to mUrlDisplayTextView
         // done (31) Use findViewById to get a reference to mSearchResultsTextView
     }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        // Return true to display your menu
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemThatWasClickedId = item.getItemId();
+        if (itemThatWasClickedId == R.id.action_search) {
+            Context context = MainActivity.this;
+            String textToShow = "Search clicked";
+            Toast.makeText(context, textToShow, Toast.LENGTH_SHORT).show();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }
