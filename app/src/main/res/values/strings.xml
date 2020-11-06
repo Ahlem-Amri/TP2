@@ -16,4 +16,5 @@
 <resources>
     <string name="app_name">Github Query</string>
     <string name="make_search">make search</string>
+    <string name="search">search</string>
 </resources>

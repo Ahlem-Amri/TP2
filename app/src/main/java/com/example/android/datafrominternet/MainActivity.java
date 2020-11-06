@@ -15,19 +15,32 @@
  */
 package com.example.android.datafrominternet;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-public class MainActivity extends AppCompatActivity {
- EditText  mSearchBoxEditText;
- TextView mUrlDisplayTextView, mSearchResultsTextView;
-    // done  (26) Create an EditText variable called mSearchBoxEditText
+import com.example.android.datafrominternet.utilities.NetworkUtils;
 
-    // done (27) Create a TextView variable called mUrlDisplayTextView
-    // done (28) Create a TextView variable called mSearchResultsTextView
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+public class MainActivity extends AppCompatActivity {
+    private static final String GITHUB_BASE_URL =null;
+    private static final String PARAM_QUERY = null;
+    private static final String PARAM_SORT = null;
+    EditText  mSearchBoxEditText;
+    String githubSearchResults = "";
+    TextView mUrlDisplayTextView, mSearchResultsTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,15 +51,13 @@ public class MainActivity extends AppCompatActivity {
         mSearchResultsTextView=findViewById(R.id.tv_github_search_results_json);
 
 
-        // done (29) Use findViewById to get a reference to mSearchBoxEditText
 
-        // done (30) Use findViewById to get a reference to mUrlDisplayTextView
-        // done (31) Use findViewById to get a reference to mSearchResultsTextView
+
+
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-        // Return true to display your menu
         return true;
     }
     @Override
@@ -60,4 +71,72 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+    public static URL buildUrl(String githubSearchQuery) {
+        String sortBy = "";
+        Uri builtUri = Uri.parse(GITHUB_BASE_URL).buildUpon()
+                .appendQueryParameter(PARAM_QUERY, githubSearchQuery)
+                .appendQueryParameter(PARAM_SORT, sortBy)
+                .build();
+
+        URL url = null;
+        try {
+            url = new URL(builtUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        return url;
+    }
+    private void makeGithubSearchQuery() {
+        String githubQuery = mSearchBoxEditText.getText().toString();
+        URL githubSearchUrl = NetworkUtils.buildUrl(githubQuery);
+        assert githubSearchUrl !=null;
+        mUrlDisplayTextView.setText(githubSearchUrl.toString());
+
+        try {
+            githubSearchResults = NetworkUtils.getResponseFromHttpUrl(githubSearchUrl);
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        mSearchResultsTextView.setText(githubSearchResults);
+        new GithubQueryTask().execute(githubSearchUrl);
+
+    }
+
+
+    public void makeGitsearch(MenuItem item) {
+        makeGithubSearchQuery();
+    }
+    @SuppressLint("StaticFieldLeak")
+    public class GithubQueryTask extends AsyncTask<URL, Void, String> {
+
+        @Override
+        protected String doInBackground(URL... urls) {
+            URL searchUrl = urls[0];
+            String githubSearchResults = null;
+            try {
+                githubSearchResults = NetworkUtils.getResponseFromHttpUrl(searchUrl);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return githubSearchResults;
+
+        }
+
+        @Override
+        protected void onPostExecute(String githubSearchResults) {
+            if (githubSearchResults != null && !githubSearchResults.equals("")) {
+                mSearchResultsTextView.setText(githubSearchResults);
+            }
+        }
+    }
+
+
+
 }
+
+
+
+
